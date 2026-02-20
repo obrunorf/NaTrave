@@ -5,6 +5,8 @@ post_title_template = "[pós-jogo] {Campeonato}: {TimeCasa} {PlacarCasa} x {Plac
 # Thread Template for ongoing matches #
 # ################################### #
 match_template = """
+{inline_banner}
+
 # [{MomentoPartida}] {TimeCasa} {PlacarFinal} {TimeFora}{PlacarAgregado}  
 **Gols {TimeCasa}:** *{TimeCasaGols}*  
 **Gols {TimeFora}:** *{TimeForaGols}*  
@@ -48,6 +50,8 @@ aggregated_score_template = """ (Agregado: {CasaAgregado} x {ForaAgregado})"""
 # Thread Template for upcoming matches
 # #################################### #
 match_no_info = """
+{inline_banner}
+
 # {TimeCasa} x {TimeFora}  
 ## **{Campeonato}**  
 **Data:** {Data}, {Horario}  
@@ -72,6 +76,8 @@ simple_match_template = """
 # Thread Template for Post-Match threads
 # ###################################### #
 post_match_template = """
+{inline_banner}
+
 # [Encerrado] {TimeCasa} {PlacarFinal} {TimeFora}{PlacarAgregado}  
 **Gols {TimeCasa}:** *{TimeCasaGols}*  
 **Gols {TimeFora}:** *{TimeForaGols}*  

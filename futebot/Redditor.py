@@ -6,7 +6,7 @@ import CommandHandler
 import PMResponse
 from DB import db_session
 from ErrorPrinter import print_error
-from praw.models import Comment, Message, Submission
+from praw.models import Comment, Message, Submission, InlineImage
 from praw.exceptions import RedditAPIException
 from prawcore.exceptions import Forbidden
 from prawcore import NotFound
@@ -104,11 +104,20 @@ def create_thread(data):
         requeriments = subreddit.post_requirements()
         if requeriments["is_flair_required"] == True:
             flair = get_default_flair(subreddit)
-    
-    if flair:
-        submission = subreddit.submit(data["title"], selftext=data["text"], flair_id=flair["id"], send_replies=False)
+    v_flair_id = flair["id"] if flair else None
+    if (data['banner']): #if banner is present
+        import tempfile
+        #temp file must be in the scope of the submission, otherwise it gets deleted
+        with tempfile.NamedTemporaryFile(mode="wb", delete=True, suffix=".png") as temp_file: 
+            temp_file.write(data['banner'].read())
+            media = {
+                "inline_banner": InlineImage(path=temp_file.name),
+                }
+            print(data["text"])
+            submission = subreddit.submit(data["title"], selftext=data["text"], flair_id=v_flair_id, send_replies=False, inline_media=media)
     else:
-        submission = subreddit.submit(data["title"], selftext=data["text"], send_replies=False)
+        data["text"] = data["text"].replace("{inline_banner}","") #remove the tag in case no data present
+        submission = subreddit.submit(data["title"], selftext=data["text"], flair_id=v_flair_id, send_replies=False)
         
     id = url_to_thread_id(submission.url)
     cached_threads[id] = data["text"]
@@ -131,13 +140,40 @@ def update_thread(data):
     # Checks if the thread's current content is identical to the update
     if id in cached_threads and cached_threads[id] == text:
         return
-    
+        
     # Updates cached text
     cached_threads[id] = text
     
     # Updates thread contents
     submission = reddit.submission(id=id)
-    submission.edit(text)
+    if data["banner"]:        
+        #try: 
+        #print("-----------------------------------------------------")
+        #print(submission.selftext.split()[0])
+        #text = "\n" + submission.selftext.split()[0] + "\n" + text
+        import tempfile
+        #temp file must be in the scope of the submission, otherwise it gets deleted
+        with tempfile.NamedTemporaryFile(mode="wb", delete=True, suffix=".png") as temp_file: 
+            temp_file.write(data['banner'].read())
+            media = {
+                "inline_banner": InlineImage(path=temp_file.name),
+                }
+            import Main, datetime, math
+            Main.total_data += os.path.getsize(temp_file.name)
+            sz_kb = math.floor(Main.total_data/1024)
+            sz_mb = math.floor(sz_kb/1024)
+            print(datetime.datetime.now().strftime("%H:%M:%S")  +" total data: "+str(sz_kb)+"kb | "+str(sz_mb)+"mb")
+            submission._edit_experimental(text, inline_media=media)
+        #print("deu bão")
+        #print(text)
+        #except:
+        if False:
+            print("deu ruim")
+            text = text.replace("{inline_banner}","")
+            submission.edit(text)
+    else:
+        text = text.replace("{inline_banner}","")
+        submission.edit(text)
 
 def delete_thread(thread_url):
     try:

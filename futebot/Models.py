@@ -110,7 +110,6 @@ class Sub(Base):
     # Other Stuff
     mod_only_request = Column(Boolean(), nullable=False, default=False)
     locked = Column(Boolean(), nullable=False, default=False)
-    
     def __repr__(self):
         return "<Sub (sub_name='{}', pre_match_time='{}', match_flair={})>"\
                 .format(self.sub_name, self.pre_match_time, self.match_flair)

@@ -219,11 +219,18 @@ def finish_match_data(s, match, thread_set):
             try:
                 # Get thread id
                 thread_id = Redditor.url_to_thread_id(thread.post_match_thread)
-                
+                import Banner
+                banner = Banner.generate_match_banner_score(match_db.home_team,
+                               match_db.away_team,
+                               match_db.choose_value("tour", "tour.name", "N/D"),                            
+                               match_db.get_team_score("home"),
+                               match_db.get_team_score("away")
+                               )
                 # Update thread's content
                 Redditor.update_thread({
                     "id": thread_id,
-                    "text": match.print_post_match(thread.url)
+                    "text": match.print_post_match(thread.url),
+                    "banner" : banner
                 })
             except Exception as e:
                 print_error(e)
@@ -283,11 +290,19 @@ def update_match_thread(thread, match_data, match_db):
         
         # Format text for thread's content
         text = match_data.print_match(thread_id, thread.post_match_thread)
-        
+    
+        import Banner
+        banner = Banner.generate_match_banner_score(match_db.home_team,
+                               match_db.away_team,
+                               match_data.choose_value("tour", "tour.name", "N/D"),                            
+                               match_data.get_team_score("home"),
+                                match_data.get_team_score("away")
+                               )
         # Actually update the thread's content
         Redditor.update_thread({
             "id": thread_id,
-            "text": text
+            "text": text,
+            "banner": banner
         })
     except Exception as e:
         print_error(e)
@@ -312,9 +327,9 @@ def run_post_match_thread(s, match, db_match, thread, sub):
     
     title = match.print_post_match_title(sub.post_title, db_match)
     text = match.print_post_match(thread.url)
-    finish_thread(s, thread, sub, title, text)
+    finish_thread(s, thread, sub, title, text, match, db_match)
 
-def finish_thread(s, thread, sub, title, text):
+def finish_thread(s, thread, sub, title, text, match_data, db_match):
     now = BotUtils.now()
     
     # Sets unpin timer for Match Thread
@@ -327,13 +342,25 @@ def finish_thread(s, thread, sub, title, text):
         thread.state = MatchPeriod.finished
         return
     
+    import Banner
+    if True:
+        banner = Banner.generate_match_banner_score(db_match.home_team,
+                               db_match.away_team,
+                               match_data.choose_value("tour", "tour.name", "N/D"),                            
+                               match_data.get_team_score("home"),
+                                match_data.get_team_score("away")
+                               )
+    else:
+        banner = None
+    
     try:
         # Create Thread
         submission_url = Redditor.create_thread({
             "sub": sub.sub_name,
             "title": title,
             "text": text,
-            "flair": None if sub.post_match_flair == None else sub.post_match_flair
+            "flair": None if sub.post_match_flair == None else sub.post_match_flair,
+            "banner" : banner
         })
     except Forbidden as e:
         print("403 Token, Source: Create Post-Match Thread")

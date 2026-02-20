@@ -21,6 +21,8 @@ update_interval = 30
 cache_clear_interval = 120
 last_date = None
 
+total_data = 0
+
 def start_up():
     print("Bot Name: {Name}".format(Name=Redditor.get_bot_name()))
     print("Bot started at {}".format(BotUtils.now().strftime("%d/%m/%Y, %H:%M:%S")))
@@ -74,7 +76,7 @@ def start_up():
         Scheduler.find_match_links()
         
         # Creates the thread for match threads
-        Scheduler.create_match_threads()
+        #Scheduler.create_match_threads() #first
         
         # Sets state to pre_match for matches starting in 60 minutes
         MatchManager.start_pre_match()
@@ -82,6 +84,8 @@ def start_up():
         # Updates threads' contents, and create post-match thread if needed
         MatchManager.run_matches()
         MatchManager.finish_untracked_matches()
+
+        Scheduler.create_match_threads() #second
         
         # Tries to find matches that have been cancelled/postponed
         Scheduler.find_aborted_matches()

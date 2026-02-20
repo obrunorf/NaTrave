@@ -619,6 +619,7 @@ def unpin_threads():
         print_error(s.error)
 
 def create_base_thread(thread_data, match_data, sub_data):
+    import Banner
     title = BotUtils.format_str(sub_data.match_title,
         Campeonato=match_data.tournament,
         TimeCasa=match_data.home_team,
@@ -636,12 +637,21 @@ def create_base_thread(thread_data, match_data, sub_data):
         Horario=match_data.start_time.strftime('%H:%M')
     )
     flair = None if sub_data.match_flair == None else sub_data.match_flair
+    if True:
+        banner = Banner.generate_base_match_thread_banner(match_data.home_team,
+                               match_data.away_team,
+                               match_data.tournament.strip(),
+                               match_data.start_time.strftime('%H:%M')                               
+                               )
+    else:
+        banner = None
     try:
         submission_url = Redditor.create_thread({
             "sub": sub_data.sub_name,
             "title": title,
             "text": text,
-            "flair": flair
+            "flair": flair,
+            "banner": banner
         })
         return submission_url
     except Forbidden as e:

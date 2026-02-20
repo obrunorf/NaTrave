@@ -182,7 +182,8 @@ class HubData:
                 "sub": sub_data.sub_name,
                 "title": title,
                 "text": text,
-                "flair": flair
+                "flair": flair,
+                "banner": None #TODO: a match hub banner at some point?
             })
             return submission_url
         except Forbidden as e:
